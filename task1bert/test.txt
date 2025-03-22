@@ -1,0 +1,134 @@
+Processing sample resumes...
+ 20%|██        | 1/5 [00:04<00:18,  4.52s/it]
+Resume ID: 0
+  PL: java, Production SQL Server, SQL Server, SSIS, OLTP...
+  FW: 
+  DB: sql, T-SQL
+  CP: 
+  DO: 
+  NS: security
+  DAS: Always On Availability
+  SWE: 
+  PM: 
+  EC: bachelor
+  SS: communication
+ 40%|████      | 2/5 [00:06<00:08,  2.83s/it]
+Resume ID: 1
+  PL: java, Microsoft PowerPoint, Windows XP, Microsoft office, Assembly Language...
+  FW: 
+  DB: sql
+  CP: 
+  DO: 
+  NS: security
+  DAS: 
+  SWE: 
+  PM: 
+  EC: 
+  SS: 
+ 60%|██████    | 3/5 [00:08<00:05,  2.60s/it]
+Resume ID: 2
+  PL: java, ORACLE, ORACLE 10G, LINUX, RMAN...
+  FW: 
+  DB: sql, oracle, SQL*Plus
+  CP: 
+  DO: 
+  NS: 
+  DAS: 
+  SWE: architecture
+  PM: 
+  EC: master
+  SS: 
+ 80%|████████  | 4/5 [00:10<00:02,  2.48s/it]
+Resume ID: 3
+  PL: python, java, php, Amazon Redshift, PostgresSQL...
+  FW: 
+  DB: sql, mysql, postgresql, oracle, SQL Management
+  CP: aws, s3, AWS Big Data Ecosystem
+  DO: 
+  NS: 
+  DAS: big data, tableau
+  SWE: 
+  PM: 
+  EC: bachelor
+  SS: communication
+100%|██████████| 5/5 [00:14<00:00,  2.82s/it]
+
+Resume ID: 4
+  PL: java, perl, Oracle, Linux, Sun...
+  FW: 
+  DB: sql, oracle
+  CP: 
+  DO: 
+  NS: security
+  DAS: 
+  SWE: agile, scrum, architecture
+  PM: jira, scrum master, product owner, agile, sprint planning
+  EC: master
+  SS: communication
+
+Processing sample job postings...
+ 20%|██        | 1/5 [00:01<00:05,  1.29s/it]
+Job ID: 11009123
+  PL: Revit, AutoCAD, Microsoft Office Suite, Adobe Creative Suite, D...
+  FW: 
+  DB: 
+  CP: 
+  DO: 
+  NS: 
+  DAS: 
+  SWE: architecture
+  PM: 
+  EC: master
+  SS: leadership, collaboration
+ 40%|████      | 2/5 [00:02<00:03,  1.20s/it]
+Job ID: 69333422
+  PL: 
+  FW: 
+  DB: 
+  CP: 
+  DO: 
+  NS: 
+  DAS: 
+  SWE: 
+  PM: 
+  EC: 
+  SS: communication, interpersonal
+ 60%|██████    | 3/5 [00:02<00:01,  1.30it/s]
+Job ID: 133130219
+  PL: 
+  FW: 
+  DB: 
+  CP: 
+  DO: 
+  NS: 
+  DAS: 
+  SWE: 
+  PM: 
+  EC: bachelor
+  SS: 
+ 80%|████████  | 4/5 [00:03<00:00,  1.11it/s]
+Job ID: 175485704
+  PL: javascript, php, HTML, CSS
+  FW: 
+  DB: mysql
+  CP: 
+  DO: 
+  NS: 
+  DAS: 
+  SWE: object-oriented
+  PM: 
+  EC: 
+  SS: communication, collaboration
+100%|██████████| 5/5 [00:04<00:00,  1.07it/s]
+Job ID: 266825034
+  PL: javascript, php, Web Application, Web Development, Spanish/Portuguese
+  FW: 
+  DB: 
+  CP: 
+  DO: 
+  NS: 
+  DAS: 
+  SWE: 
+  PM: 
+  EC: bachelor
+  SS: communication
