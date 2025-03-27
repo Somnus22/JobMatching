@@ -11,7 +11,7 @@ Hence, this project aims to develop a text analysis solution that automatically 
 | Dataset | Description |
 | ------- | ----------- |
 | [Resume Corpus](https://github.com/florex/resume_corpus) | Contains a collection of resumes |
-| [LinkedIn Job Postings](https://www.kaggle.com/datasets/arshkon/linkedin-job-postings) | Constains a collection of job postings |
+| [LinkedIn Job Postings](https://www.kaggle.com/datasets/arshkon/linkedin-job-postings) | Contains a collection of job postings |
 
 We carried out simple data and text preprocessing prior to obtaining the statistical data required for the EDA. 
 
