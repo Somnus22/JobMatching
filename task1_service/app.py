@@ -59,7 +59,7 @@ def uploadResume():
     except Exception as e:
         app.logger.error(f"Error uploading resume: {str(e)}")
         return jsonify({'error': 'Failed to upload resume'}), 500
-    
+     
 # Apply model 1 
 @app.route('/model1', methods=['GET'])
 def model_1():
@@ -83,13 +83,58 @@ def model_1():
         app.logger.error(f"Error applying model 1 for task 1: {str(e)}")
         return jsonify({'error': 'Failed to apply model 1'}), 500
 
-# @app.route('/model2', methods=['GET'])
-# def model_2():
-#     try:
-#         s
-#     except Exception as e:
-#         app.logger.error(f"Error applying model 1 for task 1: {str(e)}")
-#         return jsonify({'error': 'Failed to retrieve products'}), 500
+@app.route('/model2', methods=['GET'])
+def model_2():
+    try:
+        name = request.args.get('name')
+        if not name: 
+            return jsonify({'error': 'No name provided'}), 500
+        
+        pulledResume = Resume.query.filter_by(name=name).first()
+        if pulledResume is None:
+            return jsonify({"error": "Resume not found"}), 404
+        
+        resume = pulledResume.text
+        predictions = predict_entities(resume)
+        predictions.pop("Outside (O)", None)
+        return jsonify(predictions), 200
+    except Exception as e:
+        app.logger.error(f"Error applying model 2 for task 1: {str(e)}")
+        return jsonify({'error': 'Failed to apply model 2'}), 500
+
+@app.route('/model3', methods=['GET'])
+def model_3():
+    try:
+        name = request.args.get('name')
+        if not name: 
+            return jsonify({'error': 'No name provided'}), 500
+        
+        pulledResume = Resume.query.filter_by(name=name).first()
+        if pulledResume is None:
+            return jsonify({"error": "Resume not found"}), 404
+        
+        resume = pulledResume.text
+        resume_ngrams = extract_ngrams_from_text(resume)  # Generate n-grams
+        resume_skills = match_skills(resume_ngrams, resume)  # Match skills
+        education_skills = resume_skills["Education Certification (EC)"]
+        predictions = predict_entities(resume)
+        outside_words = predictions["Outside (O)"]  # Extract "Outside" words/phrases from Model 2
+        outside_text = preprocess_text(" ".join(outside_words))
+        outside_ngrams = extract_ngrams_from_text(outside_text)  # Generate n-grams
+        skills_from_outside = match_skills(outside_ngrams, outside_text)  # Match skills
+
+        for category, skills in predictions.items():
+            if category != "Outside (O)" and category != "Education Certification (EC)":
+                for word in skills:
+                    skills_from_outside[category].add(preprocess_text(word))
+        
+        skills_from_outside["Education Certification (EC)"] = education_skills
+        outside_skills_dict = {key:list(itemList) for key,itemList in skills_from_outside.items()}
+
+        return jsonify(outside_skills_dict), 200
+    except Exception as e:
+        app.logger.error(f"Error applying model 3 for task 1: {str(e)}")
+        return jsonify({'error': 'Failed to apply model 3'}), 500
 
 if __name__ == '__main__':
     # Run the Flask app on all network interfaces

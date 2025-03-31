@@ -2,28 +2,29 @@ import re
 import nltk
 from nltk.util import ngrams
 from collections import defaultdict
+import joblib
 
 nltk.download('punkt_tab')
 
 skill_dictionaries = {
-    "Programming Language (PL)" : [
+    "Programming Languages (PL)" : [
         "python","java",'javascript','java script',"c++","c","c#","ruby",'go','php','swift','typescript','type script','kotlin',
         'rust','scala','perl','r','matlab','assembly','visual basic','visual basic for applications','vba'
     ],
 
-    "Framework (FW)": [
+    "Frameworks (FW)": [
         "django", "flask", "spring", "spring framework", "spring boot", "react", "reactnative", "angular", "vue", "express", "fastapi", "asp.net", 
         ".net", "laravel", "ruby on rails", "symfony", "meteor", "gatsby", "svelte", "phoenix", "cake"
     ],
 
-    "Database (DB)": [
+    "Databases (DB)": [
         "datastore", "firestore", "metastore", "blob storage", "object storage", "file storage", "data storage", "disk storage", "cloud storage",
         "database", "knowledgebase", "firebase", "hbase", "database management", "database system", "database administration"
         "data warehouse", "data lake", "data mart", "data repository", "data center", "data server", "data modeling",
         "redis", "cassandra"
     ],
 
-    "Cloud Platform (CP)":[
+    "Cloud Platforms (CP)":[
         "cloud", "cloud computing", "cloud storage", "cloud infrastructure", "cloud platform",
         "azure", "azure kubernetes service", "microsoft azure", 
         "gcp", "google cloud", "google cloud platform", "google cloud functions",
@@ -231,74 +232,227 @@ def match_skills(ngram_list, text):
     
     for skill in js_frameworks:
         clean_skill = skill.replace('.', '')
-        extracted_skills["Framework (FW)"].add(clean_skill)
+        extracted_skills["Frameworks (FW)"].add(clean_skill)
     
     for skill in sql_db:
-        extracted_skills["Database (DB)"].add(clean_skill)
+        extracted_skills["Databases (DB)"].add(clean_skill)
     
     return extracted_skills
 
-testResume = """
-DAVID CHEN
+def word2features(sent, i):
+    """Extract features for a given word in a sentence"""
+    word = sent[i][0]  # The word itself
+    
+    # Basic features
+    features = {
+        'bias': 1.0,
+        'word.lower()': word.lower(),
+        'word[-3:]': word[-3:],  # Suffix
+        'word[-2:]': word[-2:],
+        'word.isupper()': word.isupper(),
+        'word.istitle()': word.istitle(),
+        'word.isdigit()': word.isdigit(),
+    }
+
+# Features for words at the beginning of sentence
+    if i == 0:
+        features['BOS'] = True
+    else:
+        word_prev = sent[i-1][0]
+        features.update({
+            '-1:word.lower()': word_prev.lower(),
+            '-1:word.istitle()': word_prev.istitle(),
+            '-1:word.isupper()': word_prev.isupper(),
+        })
+    
+    # Features for words at the end of sentence
+    if i == len(sent)-1:
+        features['EOS'] = True
+    else:
+        word_next = sent[i+1][0]
+        features.update({
+            '+1:word.lower()': word_next.lower(),
+            '+1:word.istitle()': word_next.istitle(),
+            '+1:word.isupper()': word_next.isupper(),
+        })
+    
+    return features
+
+def sent2features(sent):
+    """Extract features for all words in a sentence"""
+    return [word2features(sent, i) for i in range(len(sent))]
+
+def sent2labels(sent):
+    """Extract labels for all words in a sentence"""
+    return [token[1] for token in sent]
+
+crf = joblib.load('crf_model.joblib')
+def predict_entities(text):
+    # Tokenize the text (you might want to use your existing tokenization)
+    tokens = text.split()  # Simple splitting, you might want something more sophisticated
+    # Create features
+    features = sent2features([(token, 'O') for token in tokens])  # Dummy labels
+    
+    # Predict
+    predictions = crf.predict([features])[0]
+    
+    # Combine tokens with their predictions + generate dictionary format
+    predictions_dict = generate_dictionary(list(zip(tokens, predictions)))
+    
+    return predictions_dict
+
+def generate_dictionary(prediction_list):
+    all_labels = {
+        "PL": "Programming Languages",
+        "FW": "Frameworks",
+        "DB": "Databases",
+        "CP": "Cloud Platforms",
+        "DO": "DevOps",
+        "NS": "Network & Security",
+        "DAS": "Data Analysis & Science",
+        "SWE": "Software Engineering",
+        "PM": "Project Management",
+        "EC": "Education Certification",
+        "SS": "Soft Skills",
+        "O": "Outside"
+    }
+    
+    prediction_dict = {label: [] for label in all_labels}
+    current_phrase = []
+    current_label = None
+    
+    for word, label in prediction_list:
+        if label == "O":
+            if current_phrase and current_label:
+                prediction_dict[current_label].append(" ".join(current_phrase))
+                current_phrase = []
+                current_label = None
+            prediction_dict["O"].append(word)
+        else:
+            main_category = label[2:]
+            if label.startswith("B-"):
+                if current_phrase and current_label:
+                    prediction_dict[current_label].append(" ".join(current_phrase))
+                current_phrase = [word]
+                current_label = main_category
+            elif label.startswith("I-") and current_label == main_category:
+                current_phrase.append(word)
+    
+    if current_phrase and current_label:
+        prediction_dict[current_label].append(" ".join(current_phrase))
+    
+    normalized_dict = {
+        "Programming Languages (PL)": [],
+        "Frameworks (FW)": [],
+        "Databases (DB)": [],
+        "Cloud Platforms (CP)": [],
+        "DevOps (DO)": [],
+        "Network & Security (NS)": [],
+        "Data Analysis & Science (DAS)": [],
+        "Software Engineering (SWE)": [],
+        "Project Management (PM)": [],
+        "Education Certification (EC)": [],
+        "Soft Skills (SS)": [],
+        "Outside (O)": []
+    }
+
+    for key in prediction_dict.keys():
+        new_key = all_labels[key] + " (" + key + ")"
+        normalized_dict[new_key] = prediction_dict[key]
+    
+    return normalized_dict
+
+sample_text = """
+JOHN SMITH
+123 Tech Lane, Silicon Valley, CA 94025
+Phone: (555) 123-4567
+Email: john.smith@email.com
+
+PROFESSIONAL SUMMARY
+Experienced Software Engineer with 5+ years of expertise in full-stack development and machine learning applications. Proven track record of delivering scalable solutions and leading cross-functional teams.
+
+WORK EXPERIENCE
+
+Senior Software Engineer
+Google, Mountain View, CA
+January 2020 - Present
+• Led development of cloud-based machine learning pipeline processing 1M+ daily transactions
+• Managed team of 6 engineers, improving sprint velocity by 40%
+• Implemented microservices architecture using Python and Kubernetes
+• Reduced system latency by 60% through optimization of database queries
+
 Software Developer
-Boston, MA | david.chen@email.com | (617) 555-1234 | linkedin.com/in/davidchen
-
-SUMMARY
--------
-Dedicated Software Developer with 4 years of experience in full-stack web development. Proficient in JavaScript, Python, and Java with expertise in React.js and Django frameworks. Passionate about creating efficient, scalable solutions and continuously learning new technologies.
-Database management, Database administration, Database security, Database modelling, Stress testing, load testing, express.js, front-end, decision-making
-
-SKILLS
-------
-Languages: JavaScript, Python, Java, TypeScript, HTML5, CSS3, SQL, C++, C#. C
-Frameworks & Libraries: React.js, Django, Spring Boot, Node.js, Express.js, jQuery, Bootstrap
-Tools & Technologies: Git, Docker, AWS (EC2, S3), RESTful APIs, MongoDB, PostgreSQL, Redis, MS SQL SERVER, GRAPHSQL, NOSQL, FIREBASE, gitlab
-Methodologies: Agile/Scrum, Test-Driven Development, CI/CD
-
-PROFESSIONAL EXPERIENCE
-----------------------
-SOFTWARE DEVELOPER | Innovate Solutions | Boston, MA | 2022-Present
-- Developed and maintained multiple web applications using React.js and Django, serving 20,000+ users
-- Implemented authentication system using OAuth 2.0, improving security and user experience
-- Containerized applications using Docker, reducing deployment time by 40%
-- Collaborated with UX designers to implement responsive, accessible user interfaces
-- Participated in code reviews and mentored junior developers
-
-JUNIOR SOFTWARE DEVELOPER | TechStart Inc. | Cambridge, MA | 2020-2022
-- Built RESTful APIs using Django and integrated with front-end React components
-- Optimized database queries in PostgreSQL, improving application performance by 30%
-- Created automated testing suites with Pytest and Jest, achieving 85% code coverage
-- Assisted in migrating legacy PHP application to modern React/Django stack
-- Participated in daily stand-ups and bi-weekly sprint planning meetings
+Microsoft, Seattle, WA
+June 2017 - December 2019
+• Developed REST APIs serving 500K+ daily users
+• Collaborated with product teams to implement new features in Azure platform
+• Mentored 3 junior developers and conducted code reviews
+• Created automated testing framework reducing QA time by 30%
 
 EDUCATION
----------
-BACHELOR OF SCIENCE IN COMPUTER SCIENCE | Boston University | 2020
-- GPA: 3.7/4.0
-- Relevant coursework: Data Structures, Algorithms, Database Systems, Web Development
-- Senior Project: Developed a task management application using MERN stack
 
-PROJECTS
---------
-INVENTORY MANAGEMENT SYSTEM | github.com/davidchen/inventory-app
-- Built a full-stack inventory management application using React, Node.js, and MongoDB
-- Implemented barcode scanning functionality using WebRTC
-- Deployed application to AWS with CI/CD pipeline using GitHub Actions
+Master of Science in Computer Science
+Stanford University, Stanford, CA
+2015 - 2017
+• GPA: 3.9/4.0
+• Thesis: "Deep Learning Applications in Natural Language Processing"
 
-WEATHER VISUALIZATION DASHBOARD | github.com/davidchen/weather-viz
-- Created an interactive dashboard using D3.js to visualize historical weather data
-- Integrated with OpenWeatherMap API to fetch and display real-time weather information
-- Implemented responsive design principles for mobile compatibility
+Bachelor of Science in Software Engineering
+University of California, Berkeley
+2011 - 2015
+• Dean's List: All semesters
+• Minor in Mathematics
+
+SKILLS
+
+Programming Languages:
+• Python, Java, JavaScript, C++
+• SQL, MongoDB, PostgreSQL
+• React, Node.js, Django
+
+Tools & Technologies:
+• Docker, Kubernetes, AWS
+• TensorFlow, PyTorch
+• Git, Jenkins, JIRA
 
 CERTIFICATIONS
--------------
-- AWS Certified Developer – Associate
-- MongoDB Certified Developer
-- Certified Scrum Master (CSM)
+• AWS Certified Solutions Architect
+• Google Cloud Professional Developer
+• Certified Scrum Master
 
-ADDITIONAL INFORMATION
----------------------
-- Languages: English (Native), Mandarin Chinese (Fluent)
-- Volunteer: Code instructor at local community center teaching Python to high school students
-- Interests: Hiking, photography, contributing to open-source projects" \" \
+PROJECTS
+
+Machine Learning News Aggregator
+• Built news classification system using BERT
+• Achieved 95% accuracy in topic categorization
+• Deployed on AWS using containerized architecture
+
+Real-time Analytics Dashboard
+• Developed dashboard processing 100K+ events/second
+• Implemented using React and WebSocket
+• Reduced loading time by 70%
+
+LANGUAGES
+• English (Native)
+• Spanish (Professional)
+• Mandarin (Basic)
+
+AWARDS & ACHIEVEMENTS
+• Best Technical Innovation Award, Google (2021)
+• 1st Place, Microsoft Hackathon (2018)
+• Published paper in ACM Conference on ML (2017)
 """
+
+category_abbreviations = {
+    "Programming Language (PL)": "PL",
+    "Framework (FW)": "FW",
+    "Database (DB)": "DB",
+    "Cloud Platform (CP)": "CP",
+    "DevOps (DO)": "DO",
+    "Network & Security (NS)": "NS",
+    "Data Analysis & Science (DAS)": "DAS",
+    "Software Engineering (SWE)": "SWE",
+    "Project Management (PM)": "PM",
+    "Education Certification (EC)": "EC",
+    "Soft Skills (SS)": "SS",
+}

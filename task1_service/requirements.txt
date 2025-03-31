@@ -3,3 +3,5 @@ nltk
 PyMuPDF
 Flask-SQLAlchemy
 Flask-Cors
+joblib
+sklearn-crfsuite
