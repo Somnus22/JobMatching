@@ -1,134 +1,72 @@
-Processing sample resumes...
- 20%|██        | 1/5 [00:04<00:18,  4.52s/it]
-Resume ID: 0
-  PL: java, Production SQL Server, SQL Server, SSIS, OLTP...
-  FW: 
-  DB: sql, T-SQL
-  CP: 
-  DO: 
-  NS: security
-  DAS: Always On Availability
-  SWE: 
-  PM: 
-  EC: bachelor
-  SS: communication
- 40%|████      | 2/5 [00:06<00:08,  2.83s/it]
-Resume ID: 1
-  PL: java, Microsoft PowerPoint, Windows XP, Microsoft office, Assembly Language...
-  FW: 
-  DB: sql
-  CP: 
-  DO: 
-  NS: security
-  DAS: 
-  SWE: 
-  PM: 
-  EC: 
-  SS: 
- 60%|██████    | 3/5 [00:08<00:05,  2.60s/it]
-Resume ID: 2
-  PL: java, ORACLE, ORACLE 10G, LINUX, RMAN...
-  FW: 
-  DB: sql, oracle, SQL*Plus
-  CP: 
-  DO: 
-  NS: 
-  DAS: 
-  SWE: architecture
-  PM: 
-  EC: master
-  SS: 
- 80%|████████  | 4/5 [00:10<00:02,  2.48s/it]
-Resume ID: 3
-  PL: python, java, php, Amazon Redshift, PostgresSQL...
-  FW: 
-  DB: sql, mysql, postgresql, oracle, SQL Management
-  CP: aws, s3, AWS Big Data Ecosystem
-  DO: 
-  NS: 
-  DAS: big data, tableau
-  SWE: 
-  PM: 
-  EC: bachelor
-  SS: communication
-100%|██████████| 5/5 [00:14<00:00,  2.82s/it]
+Dominic Jovin
+Personal Email: dominicjovin7@gmail.com | (+65) 83170131 | Singapore
+LinkedIn: https://www.linkedin.com/in/dominic-jovin-68a5a9288/ | GitHub: https://github.com/PauPau1003
 
-Resume ID: 4
-  PL: java, perl, Oracle, Linux, Sun...
-  FW: 
-  DB: sql, oracle
-  CP: 
-  DO: 
-  NS: security
-  DAS: 
-  SWE: agile, scrum, architecture
-  PM: jira, scrum master, product owner, agile, sprint planning
-  EC: master
-  SS: communication
+Education
+Singapore Management University Aug 2022 – Expected Dec 2025
+Bachelor of Science, Information Systems Singapore
+Cumulative GPA: 3.28/4.00
+Relevant Coursework: Object Oriented Programming, Cloud Engineering, Enterprise Solution Development
+Eligible to work using Student Pass. Available from May 5, 2025 to Aug 22, 2025
 
-Processing sample job postings...
- 20%|██        | 1/5 [00:01<00:05,  1.29s/it]
-Job ID: 11009123
-  PL: Revit, AutoCAD, Microsoft Office Suite, Adobe Creative Suite, D...
-  FW: 
-  DB: 
-  CP: 
-  DO: 
-  NS: 
-  DAS: 
-  SWE: architecture
-  PM: 
-  EC: master
-  SS: leadership, collaboration
- 40%|████      | 2/5 [00:02<00:03,  1.20s/it]
-Job ID: 69333422
-  PL: 
-  FW: 
-  DB: 
-  CP: 
-  DO: 
-  NS: 
-  DAS: 
-  SWE: 
-  PM: 
-  EC: 
-  SS: communication, interpersonal
- 60%|██████    | 3/5 [00:02<00:01,  1.30it/s]
-Job ID: 133130219
-  PL: 
-  FW: 
-  DB: 
-  CP: 
-  DO: 
-  NS: 
-  DAS: 
-  SWE: 
-  PM: 
-  EC: bachelor
-  SS: 
- 80%|████████  | 4/5 [00:03<00:00,  1.11it/s]
-Job ID: 175485704
-  PL: javascript, php, HTML, CSS
-  FW: 
-  DB: mysql
-  CP: 
-  DO: 
-  NS: 
-  DAS: 
-  SWE: object-oriented
-  PM: 
-  EC: 
-  SS: communication, collaboration
-100%|██████████| 5/5 [00:04<00:00,  1.07it/s]
-Job ID: 266825034
-  PL: javascript, php, Web Application, Web Development, Spanish/Portuguese
-  FW: 
-  DB: 
-  CP: 
-  DO: 
-  NS: 
-  DAS: 
-  SWE: 
-  PM: 
-  EC: bachelor
-  SS: communication
+Work Experience
+Software Engineering Intern June 2024 – September 2024
+OCBC Indonesia Tangerang, Indonesia
+Data Pipeline: Processed and streamed 20,000+ daily service transaction logs using Kafka; conducted comprehensive load testing of Kafka consumers to validate system resilience under peak traffic conditions, ensuring stable data throughput and identifying potential bottlenecks
+Infra: Built internal Grafana payment monitoring dashboard using Filebeat, Logstash, and ClickHouse, delivering granular insights into OCBC transactions and stakeholder activities.
+Performance: Enhanced ClickHouse query performance by 5-10x through strategic implementation of Materialized Views
+DevOps: Automated database version control using Goose migration scripts, managed data lifecycle with ClickHouse TTL, created backup strategies via Cronjobs, and containerized applications for AWS EC2 deployment.
+Monitoring: Implemented robust Grafana monitoring with Oncall alerting system, integrating Gmail SMTP and Discord webhooks for real-time incident response
+
+Projects
+All-in-One | Work From Home Tracking System September 2024 – November 2024
+Backend: Engineered a modular Golang Echo application using Clean Architecture principles, ensuring scalability with clearly defined layers for controllers, models, services, and utilities.
+Frontend: Developed a responsive Next.js application with role-based interfaces for employees, HR, and managers, leveraging modular component architecture and TypeScript for enhanced type safety.
+Database: Designed and managed PostgreSQL schemas, hosted on AWS EC2, and implemented schema migrations with Goose for reliable version control.
+CI/CD: Built a GitHub Actions workflow for automated testing, deployment, and monitoring, complemented by systemd service configurations for smooth service management on AWS EC2.
+Testing: Attained an average of 80% code coverage through robust unit and integration tests (GoTest for backend, Cypress for frontend), supplemented by strict code quality checks using ESLint and Golangci-lint.
+
+Frntr | Furniture E-commerce System October 2024 – November 2024
+Cloud: Designed and implemented a scalable AWS-based infrastructure with multi-layer architecture, including EC2 instances, Auto Scaling Groups, and Elastic Load Balancers across web and application layers
+Auth: Integrated AWS Cognito for secure user management, implementing seamless login and signup processes with identity federation
+Database: Configured Amazon RDS with Multi-AZ deployment for high availability, implementing synchronous data replication and automated backup strategies
+Infra: Utilized Amazon CloudFront and S3 for efficient static content delivery, implementing AWS WAF for security and protection against web threats
+Monitoring: Set up comprehensive AWS CloudWatch monitoring, creating dashboards and alarms to track system performance and enable proactive maintenance
+
+CleanShift | Automated Scheduler System for Abba Maintenance Services September 2024 – November 2024
+Backend: Designed a Spring Boot application using Java and Maven, implementing object-oriented principles with modular system architecture (config, controller, repository, service layers)
+Backend: Developed advanced worker assignment algorithms that dynamically sort and allocate workers based on proximity, availability, and task constraints
+Frontend: Implemented user interfaces using NextJS, Shadcn, and Clerk for multiple roles (worker, client, admin) with distinct functionalities including order creation, task management, leave applications, and dashboard analytics
+Deployment: Deployed full-stack application across Firebase, AWS EC2, and Vercel supporting multi-role system with RESTful API endpoints.
+
+Bangcrocs | Dashboard Product on Yay! Blockchain Social Media for Data Wow and Nanameue January 2024 – May 2024
+Analysis: Conducted comprehensive data analytics on the client's Yay! platform using Tableau for visualization. Leveraged social network, circle, and user behavior analyses to derive actionable insights for platform growth. Integrated diverse data sources, including CSV datasets and web-scraped information, employing Python (BeautifulSoup, Pandas) for in-depth analysis.
+Feature Engineering: Performed continuous feature engineering to optimize input datasets for machine learning models, enabling improved clustering and recommendations.
+Clustering: Applied k-means clustering techniques to identify user segments and behavioral patterns, aiding in targeted feature development and engagement strategies.
+Recommendation: Developed a proof-of-concept recommender system to enhance user engagement, matching users with relevant circles and content based on user attributes and clustering insights.
+ML: Designed an auto-flagging mechanism for content moderation using Hugging Face transformers for sentiment analysis, enabling efficient detection of potentially inappropriate posts and ensuring platform safety.
+
+JomLetsGo | Microservice-Based Car Rental Platform March 2024 – April 2024
+Architecture: Designed microservices-based car-sharing application with 6+ modular services using Flask Python
+Infrastructure: Implemented Kong API Gateway for service routing and RabbitMQ (AMQP) for asynchronous messaging between microservices
+Performance: Enhanced system responsiveness by utilizing Python threading library for parallel queue processing
+Monitoring: Configured Prometheus and Grafana for comprehensive system health monitoring and logging
+Backend: Developed services for car search, booking, damage reporting, and user notifications with robust error handling. Utilized Google Maps and Geocoding APIs for location-based car search and distance calculation
+
+BookMe | Service Provider Booking Platform October 2023 – November 2023
+Frontend: Led responsive web application development using Vue JS, implementing responsive design with Vuetify.
+Backend: Integrated payment processing using Stripe checkout API with ExpressJS backend and Firestore.
+Integration: Implemented scheduling system using Calendly API with automated email notification workflow
+
+Technical Skills
+Languages: Python, Go, TypeScript, SQL, Java, Bash
+Frontend: React, NextJS, Vue
+Backend: Express, Flask, Spring Boot
+Cloud & DevOps: AWS, Docker, Kubernetes, GitHub Actions, Prometheus, Grafana
+Databases: PostgreSQL, MySQL, ClickHouse, Firebase, Amazon RDS
+Tools: Git, Jira, Kafka, RabbitMQ, Stripe, Cypress
+Core Competencies: Microservices Architecture, CI/CD, Performance Optimization, Data Analytics
+
+Awards and Certifications
+Certifications: Oracle Java Certified Associate
+Awards: SMU Ellipsis Tech Series Finalist 2023

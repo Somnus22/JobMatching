@@ -1,3 +1,5 @@
 resumes
 datasets/
 *.csv
+task1bert/ner_skills_model/
+task1bert/results/
