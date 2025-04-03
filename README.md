@@ -63,3 +63,11 @@ Text Preprocessing (For NLP Tasks)
 - **Recall:** Measures how many relevant resumes are retrieved compared to all possible relevant resumes
 - **F1-score:** Harmonic mean of precision and recall, balancing false positives and false negatives
 - **Mean Reciprocal Rank (MRR):** Evaluates ranked retrieval performance, checking how high relevant resumes are ranked
+
+### Running the App
+1) in the main folder, type docker-compose -f docker_compose.yml up --build
+2) run the html via MAMP
+3) Upload Resume
+4) Extract Skills
+5) Load Job Postings
+6) Match to Jobs
