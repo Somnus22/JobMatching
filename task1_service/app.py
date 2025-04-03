@@ -105,11 +105,8 @@ def match():
         jobs = [(job.job_id, json.loads(json.loads(job.extracted_skills_json))) for job in pulledJobs]
         userSkills = json.loads(Resume.query.filter_by(name=name).first().extracted_skills_json)
         userCombinedSkills = combineSkillsToString(userSkills)
-        app.logger.info(userCombinedSkills)
         jobsCombined = [(jobID, combineSkillsToString(skills)) for jobID, skills in jobs]
-        app.logger.info(jobsCombined)
         matchingScores = find_similar_texts(userCombinedSkills, jobsCombined, matching_model)
-        app.logger.info(matchingScores)
         return jsonify(matchingScores), 200
     except Exception as e:
         app.logger.error(f"Error matching: {str(e)}")
