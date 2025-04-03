@@ -28,7 +28,7 @@ class JobPosting(db.Model):
 
 with app.app_context():
     db.create_all()
-    with open("extracted_job_skills.csv", "r", encoding="utf-8") as file:
+    with open("./datasets/extracted_job_skills.csv", "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
         for row in reader:
             db.session.add(JobPosting(job_id=row["job_id"], text=row["cleaned_description"], extracted_skills_json=json.dumps(row["extracted_skills"])))

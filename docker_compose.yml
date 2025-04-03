@@ -1,7 +1,7 @@
 services:
   task1-service:
     build:
-      context: ./task1_service
+      context: ./final-service
       dockerfile: Dockerfile
     ports:
       - "5001:5000"
