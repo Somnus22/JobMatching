@@ -5,6 +5,8 @@ from resources import *
 import logging
 import fitz 
 import io
+import csv
+import json 
 
 app = Flask(__name__)
 CORS(app)  # Allow all origins
@@ -17,17 +19,27 @@ db = SQLAlchemy(app)
 class Resume(db.Model):
     name = db.Column(db.String(255), primary_key=True)
     text = db.Column(db.Text, nullable=False)
+    extracted_skills_json = db.Column(db.String)
 
-# Create the database
+class JobPosting(db.Model):
+    job_id = db.Column(db.String(13), primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+    extracted_skills_json = db.Column(db.String)
+
 with app.app_context():
     db.create_all()
+    with open("extracted_job_skills.csv", "r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            db.session.add(JobPosting(job_id=row["job_id"], text=row["cleaned_description"], extracted_skills_json=json.dumps(row["extracted_skills"])))
+        file.close()
+    db.session.commit()
 
 # Function to add an entry
 def add_entry(resumeText):
-    with app.app_context():  # Required to access the database in a Flask app
-        new_entry = Resume(text=resumeText)
-        db.session.add(new_entry)
-        db.session.commit()
+    new_entry = Resume(text=resumeText)
+    db.session.add(new_entry)
+    db.session.commit()
 
 def extract_text_from_pdf(file):
     """Extract text from a PDF file directly from file stream using PyMuPDF."""
@@ -37,6 +49,13 @@ def extract_text_from_pdf(file):
     text = "\n".join([page.get_text() for page in doc])  # Extract text from each page
     return text
 
+def combineSkillsToString(skills_json):
+    finalString = ""
+    for category, skillList in skills_json.items():
+        if len(skillList) > 0:
+            finalString += ((" ".join(skillList)) + " ")
+    return finalString
+    
 @app.route('/uploadResume', methods=['POST'])
 def uploadResume():
     try:
@@ -51,7 +70,7 @@ def uploadResume():
         extracted_text = extract_text_from_pdf(file)
 
         # Store the resume in the database
-        new_resume = Resume(name=name, text=extracted_text)
+        new_resume = Resume(name=name, text=extracted_text, extracted_skills_json="")
         db.session.add(new_resume)
         db.session.commit()
 
@@ -59,51 +78,45 @@ def uploadResume():
     except Exception as e:
         app.logger.error(f"Error uploading resume: {str(e)}")
         return jsonify({'error': 'Failed to upload resume'}), 500
-     
-# Apply model 1 
-@app.route('/model1', methods=['GET'])
-def model_1():
+
+# Retrieve job postings
+@app.route('/jobs', methods=['GET'])
+def job():
+    try:
+        jobs = JobPosting.query.all()
+        job_list = []
+        for job in jobs:
+            job_dict = {
+                'job_id': job.job_id,
+                'extracted_skills_json': json.loads(job.extracted_skills_json)
+            }
+            job_list.append(job_dict)
+        return jsonify(job_list), 200
+    except Exception as e:
+        app.logger.error(f"Error retrieving jobs: {str(e)}")
+        return jsonify({'error': 'Failed to retrieve jobs'}), 500    
+
+# Match resume to job postings
+@app.route('/match', methods=['GET'])
+def match():
     try:
         name = request.args.get('name')
-        if not name: 
-            return jsonify({'error': 'No name provided'}), 500
-        
-        pulledResume = Resume.query.filter_by(name=name).first()
-        if pulledResume is None:
-            return jsonify({"error": "Resume not found"}), 404
-        
-        resume = pulledResume.text
-
-        resume_ngrams = extract_ngrams_from_text(resume)
-        resume_skills = match_skills(resume_ngrams, resume)
-
-        resume_skills_dict = {key:list(itemList) for key,itemList in resume_skills.items()}
-        return jsonify(resume_skills_dict), 200
+        pulledJobs = JobPosting.query.all()
+        jobs = [(job.job_id, json.loads(json.loads(job.extracted_skills_json))) for job in pulledJobs]
+        userSkills = json.loads(Resume.query.filter_by(name=name).first().extracted_skills_json)
+        userCombinedSkills = combineSkillsToString(userSkills)
+        app.logger.info(userCombinedSkills)
+        jobsCombined = [(jobID, combineSkillsToString(skills)) for jobID, skills in jobs]
+        app.logger.info(jobsCombined)
+        matchingScores = find_similar_texts(userCombinedSkills, jobsCombined, matching_model)
+        app.logger.info(matchingScores)
+        return jsonify(matchingScores), 200
     except Exception as e:
-        app.logger.error(f"Error applying model 1 for task 1: {str(e)}")
-        return jsonify({'error': 'Failed to apply model 1'}), 500
+        app.logger.error(f"Error matching: {str(e)}")
+        return jsonify({'error': 'Failed to match'}), 500
 
-@app.route('/model2', methods=['GET'])
-def model_2():
-    try:
-        name = request.args.get('name')
-        if not name: 
-            return jsonify({'error': 'No name provided'}), 500
-        
-        pulledResume = Resume.query.filter_by(name=name).first()
-        if pulledResume is None:
-            return jsonify({"error": "Resume not found"}), 404
-        
-        resume = pulledResume.text
-        predictions = predict_entities(resume)
-        predictions.pop("Outside (O)", None)
-        return jsonify(predictions), 200
-    except Exception as e:
-        app.logger.error(f"Error applying model 2 for task 1: {str(e)}")
-        return jsonify({'error': 'Failed to apply model 2'}), 500
-
-@app.route('/model3', methods=['GET'])
-def model_3():
+@app.route('/extract_skills', methods=['GET'])
+def extract_skills():
     try:
         name = request.args.get('name')
         if not name: 
@@ -131,10 +144,12 @@ def model_3():
         skills_from_outside["Education Certification (EC)"] = education_skills
         outside_skills_dict = {key:list(itemList) for key,itemList in skills_from_outside.items()}
 
+        pulledResume.extracted_skills_json = json.dumps(outside_skills_dict)  # Convert dict to string for storage
+        db.session.commit()
         return jsonify(outside_skills_dict), 200
     except Exception as e:
-        app.logger.error(f"Error applying model 3 for task 1: {str(e)}")
-        return jsonify({'error': 'Failed to apply model 3'}), 500
+        app.logger.error(f"Error extracting skills: {str(e)}")
+        return jsonify({'error': 'Failed to extract skills'}), 500
 
 if __name__ == '__main__':
     # Run the Flask app on all network interfaces

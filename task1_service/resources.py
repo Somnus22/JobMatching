@@ -1,10 +1,20 @@
 import re
 import nltk
 from nltk.util import ngrams
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 from collections import defaultdict
 import joblib
+import gensim
+import pandas as pd
+import numpy as np
+import os
+import string
+from sklearn.metrics.pairwise import cosine_similarity
+from gensim.models import Word2Vec
 
 nltk.download('punkt_tab')
+nltk.download("stopwords")
 
 skill_dictionaries = {
     "Programming Languages (PL)" : [
@@ -362,97 +372,32 @@ def generate_dictionary(prediction_list):
     
     return normalized_dict
 
-sample_text = """
-JOHN SMITH
-123 Tech Lane, Silicon Valley, CA 94025
-Phone: (555) 123-4567
-Email: john.smith@email.com
+def text2vec(text, model):
+    words = text.split()
+    vectors = [model.wv[word] for word in words if word in model.wv]
+    if vectors:
+        return np.mean(vectors, axis=0)
+    else:
+        return None
+    
+def find_similar_texts(input, corpus, model):
+    input_vector = text2vec(input, model)
+    if input_vector is None:
+        return "Could not generate vector for input text"
+    
+    similarities = []
+    for jobID, text in corpus:
+        text_vector = text2vec(text, model)
 
-PROFESSIONAL SUMMARY
-Experienced Software Engineer with 5+ years of expertise in full-stack development and machine learning applications. Proven track record of delivering scalable solutions and leading cross-functional teams.
+        if text_vector is not None:
+            similarity = cosine_similarity([input_vector], [text_vector])[0][0]
+            similarities.append((jobID, similarity.item()))
+        else:
+            similarities.append((jobID, 0))
 
-WORK EXPERIENCE
+    top_similar = sorted(similarities, key=lambda x: x[1], reverse=True)
 
-Senior Software Engineer
-Google, Mountain View, CA
-January 2020 - Present
-• Led development of cloud-based machine learning pipeline processing 1M+ daily transactions
-• Managed team of 6 engineers, improving sprint velocity by 40%
-• Implemented microservices architecture using Python and Kubernetes
-• Reduced system latency by 60% through optimization of database queries
+    return top_similar
 
-Software Developer
-Microsoft, Seattle, WA
-June 2017 - December 2019
-• Developed REST APIs serving 500K+ daily users
-• Collaborated with product teams to implement new features in Azure platform
-• Mentored 3 junior developers and conducted code reviews
-• Created automated testing framework reducing QA time by 30%
+matching_model =  Word2Vec.load("matching.model")
 
-EDUCATION
-
-Master of Science in Computer Science
-Stanford University, Stanford, CA
-2015 - 2017
-• GPA: 3.9/4.0
-• Thesis: "Deep Learning Applications in Natural Language Processing"
-
-Bachelor of Science in Software Engineering
-University of California, Berkeley
-2011 - 2015
-• Dean's List: All semesters
-• Minor in Mathematics
-
-SKILLS
-
-Programming Languages:
-• Python, Java, JavaScript, C++
-• SQL, MongoDB, PostgreSQL
-• React, Node.js, Django
-
-Tools & Technologies:
-• Docker, Kubernetes, AWS
-• TensorFlow, PyTorch
-• Git, Jenkins, JIRA
-
-CERTIFICATIONS
-• AWS Certified Solutions Architect
-• Google Cloud Professional Developer
-• Certified Scrum Master
-
-PROJECTS
-
-Machine Learning News Aggregator
-• Built news classification system using BERT
-• Achieved 95% accuracy in topic categorization
-• Deployed on AWS using containerized architecture
-
-Real-time Analytics Dashboard
-• Developed dashboard processing 100K+ events/second
-• Implemented using React and WebSocket
-• Reduced loading time by 70%
-
-LANGUAGES
-• English (Native)
-• Spanish (Professional)
-• Mandarin (Basic)
-
-AWARDS & ACHIEVEMENTS
-• Best Technical Innovation Award, Google (2021)
-• 1st Place, Microsoft Hackathon (2018)
-• Published paper in ACM Conference on ML (2017)
-"""
-
-category_abbreviations = {
-    "Programming Language (PL)": "PL",
-    "Framework (FW)": "FW",
-    "Database (DB)": "DB",
-    "Cloud Platform (CP)": "CP",
-    "DevOps (DO)": "DO",
-    "Network & Security (NS)": "NS",
-    "Data Analysis & Science (DAS)": "DAS",
-    "Software Engineering (SWE)": "SWE",
-    "Project Management (PM)": "PM",
-    "Education Certification (EC)": "EC",
-    "Soft Skills (SS)": "SS",
-}

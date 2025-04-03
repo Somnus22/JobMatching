@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload and Apply Model 1</title>
+    <title>Job Matching App</title>
     <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
         body {
             background-color: #f8f9fa;
@@ -27,6 +27,48 @@
         .section-title {
             margin-top: 30px;
         }
+        .job-card {
+            margin-bottom: 15px;
+        }
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .skill-tag {
+            background-color: #e9ecef;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin: 2px;
+            display: inline-block;
+            font-size: 0.85rem;
+        }
+        .score-high {
+            background-color: #28a745;
+            color: white;
+        }
+        .score-medium {
+            background-color: #ffc107;
+        }
+        .score-low {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px; /* Optional: space between skill items */
+        }
+
+        .skill {
+            background-color: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
     </style>
 </head>
 <body>
@@ -41,7 +83,7 @@
                         <input type="text" class="form-control" id="name" name="name" required placeholder="Enter your full name">
                     </div>
                     <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="inputGroupFile02" name="file" required>
+                        <input type="file" class="form-control" id="inputGroupFile" name="file" required>
                         <div class="input-group-append">
                             <button type="submit" class="btn btn-custom">Upload Resume</button>
                         </div>
@@ -51,64 +93,87 @@
             </div>
         </div>
 
-        <!-- Model 1 Section -->
+        <!-- Extract Skills Section -->
         <div class="row justify-content-center section-title">
             <div class="col-md-6">
-                <h4 class="form-title text-center mb-4">Extract skills from resume (model 1)</h4>
-                <form id="model1Form">
+                <h4 class="form-title text-center mb-4">Extract skills from resume</h4>
+                <form id="extractSkillsForm">
                     <div class="mb-3">
-                        <label for="model1Name" class="form-label">Enter your name</label>
-                        <input type="text" class="form-control" id="model1Name" name="name" required placeholder="Your name here">
+                        <label for="extractSkillsName" class="form-label">Enter your name</label>
+                        <input type="text" class="form-control" id="extractSkillsName" name="name" required placeholder="Your name here">
                     </div>
-                    <button type="submit" class="btn btn-custom btn-block">Apply model 1</button>
+                    <button type="submit" class="btn btn-custom btn-block">Apply skill extraction</button>
                 </form>
-                <div id="model1Response" class="mt-3"></div>
+                <div id="extractSkillsResponse" class="mt-3"></div>
             </div>
         </div>
 
-        <!-- Model 2 Section -->
+        <!-- Job Matching Section -->
         <div class="row justify-content-center section-title">
             <div class="col-md-6">
-                <h4 class="form-title text-center mb-4">Extract skills from resume (model 2)</h4>
-                <form id="model2Form">
+                <h4 class="form-title text-center mb-4">Match Me To Jobs</h4>
+                <form id="matchJobsForm">
                     <div class="mb-3">
-                        <label for="model2Name" class="form-label">Enter your name</label>
-                        <input type="text" class="form-control" id="model2Name" name="name" required placeholder="Your name here">
+                        <label for="matchJobsName" class="form-label">Enter your name</label>
+                        <input type="text" class="form-control" id="matchJobsName" name="name" required placeholder="Your name here">
                     </div>
-                    <button type="submit" class="btn btn-custom btn-block">Apply model 2</button>
+                    <button type="submit" class="btn btn-custom btn-block">Find Matching Jobs</button>
                 </form>
-                <div id="model2Response" class="mt-3"></div>
+                <div id="matchJobsResponse" class="mt-3">
+                    <!-- Match results will be shown here -->
+                </div>
+                <div id="matchPagination" class="pagination"></div>
             </div>
         </div>
 
-        <!-- Model 2 Section -->
-        <div class="row justify-content-center section-title">
-            <div class="col-md-6">
-                <h4 class="form-title text-center mb-4">Extract skills from resume (model 3)</h4>
-                <form id="model3Form">
-                    <div class="mb-3">
-                        <label for="model3Name" class="form-label">Enter your name</label>
-                        <input type="text" class="form-control" id="model3Name" name="name" required placeholder="Your name here">
-                    </div>
-                    <button type="submit" class="btn btn-custom btn-block">Apply model 3</button>
-                </form>
-                <div id="model3Response" class="mt-3"></div>
+        <!-- Job Postings Table Section -->
+        <div class="row section-title">
+            <div class="col-12">
+                <h4 class="form-title text-center mb-4">Available Job Postings</h4>
+                <div class="text-center mb-3">
+                    <button id="loadJobsButton" class="btn btn-custom">Load Job Postings</button>
+                </div>
+                <div id="jobPostingsContainer" class="mt-3">
+                    <!-- Job postings will be displayed here -->
+                </div>
+                <div id="jobPagination" class="pagination"></div>
             </div>
         </div>
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
+        // Global variables for pagination
+        const jobsPerPage = 5;
+        let currentJobPage = 1;
+        let allJobs = [];
+        let matchedJobs = [];
+        let currentMatchPage = 1;
+
+        // Job loading button handler
+        document.getElementById('loadJobsButton').addEventListener('click', function() {
+            document.getElementById('jobPostingsContainer').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading job postings...</p>
+                </div>
+            `;
+            fetchJobs();
+        });
+
+        // Resume upload handler
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Move this to the top
+            event.preventDefault();
             
             const formData = new FormData();
             formData.append("name", document.getElementById('name').value);
-            formData.append("file", document.getElementById('inputGroupFile02').files[0]);
+            formData.append("file", document.getElementById('inputGroupFile').files[0]);
     
-            fetch('http://localhost:5001/uploadResume', {  // Correct URL format
+            fetch('http://localhost:5001/uploadResume', {
                 method: 'POST',
                 headers: {
                     "Accept": "application/json"
@@ -117,42 +182,55 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.result || data.error);
+                if (data.result) {
+                    document.getElementById('response').innerHTML = `
+                        <div class="alert alert-success" role="alert">
+                            ${data.result}
+                        </div>
+                    `;
+                } else if (data.error) {
+                    document.getElementById('response').innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            ${data.error}
+                        </div>
+                    `;
+                }
             })
             .catch(error => {
                 console.error("Upload error:", error);
-                alert("Error uploading resume: " + error);
+                document.getElementById('response').innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        Error uploading resume: ${error}
+                    </div>
+                `;
             });
         });
-        // Handle Model 1 Search and Apply
-        document.getElementById('model1Form').addEventListener('submit', function(event) {
+
+        // Extract skills handler
+        document.getElementById('extractSkillsForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
-            const name = document.getElementById('model1Name').value;
+            const name = document.getElementById('extractSkillsName').value;
 
-            // Send GET request to Flask endpoint with the 'name' parameter
-            fetch(`http://localhost:5001/model1?name=${encodeURIComponent(name)}`, {
+            fetch(`http://localhost:5001/extract_skills?name=${encodeURIComponent(name)}`, {
                 method: 'GET',
             })
             .then(response => response.json())
             .then(data => {
-                // Handle success response from Flask
                 if (data.error) {
-                    // Show error if no resume is found or other errors
-                    document.getElementById('model1Response').innerHTML = `
+                    document.getElementById('extractSkillsResponse').innerHTML = `
                         <div class="alert alert-danger" role="alert">
                             ${data.error}
                         </div>
                     `;
                 } else {
-                    // Show the extracted skills if no error
                     let skillsList = '<ul>';
                     for (const [skill, details] of Object.entries(data)) {
                         skillsList += `<li><strong>${skill}:</strong> ${details.join(', ')}</li>`;
                     }
                     skillsList += '</ul>';
                     
-                    document.getElementById('model1Response').innerHTML = `
+                    document.getElementById('extractSkillsResponse').innerHTML = `
                         <div class="alert alert-success" role="alert">
                             <h5>Skills Found:</h5>
                             ${skillsList}
@@ -161,110 +239,303 @@
                 }
             })
             .catch(error => {
-                // Handle fetch errors
-                document.getElementById('model1Response').innerHTML = `
+                document.getElementById('extractSkillsResponse').innerHTML = `
                     <div class="alert alert-danger" role="alert">
                         Error: ${error.message}
                     </div>
                 `;
             });
+        });
+
+        // Fetch all jobs
         
-        });
-
-        // Handle Model 2 Search and Apply
-        document.getElementById('model2Form').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const name = document.getElementById('model2Name').value;
-
-        // Send GET request to Flask endpoint with the 'name' parameter
-        fetch(`http://localhost:5001/model2?name=${encodeURIComponent(name)}`, {
+        function fetchJobs() {
+            fetch('http://localhost:5001/jobs', {
                 method: 'GET',
             })
             .then(response => response.json())
             .then(data => {
-                // Handle success response from Flask
-                if (data.error) {
-                    // Show error if no resume is found or other errors
-                    document.getElementById('model2Response').innerHTML = `
-                        <div class="alert alert-danger" role="alert">
-                            ${data.error}
-                        </div>
-                    `;
-                } else {
-                    // Show the extracted skills if no error
-                    let skillsList = '<ul>';
-                    for (const [skill, details] of Object.entries(data)) {
-                        skillsList += `<li><strong>${skill}:</strong> ${details.join(', ')}</li>`;
-                    }
-                    skillsList += '</ul>';
-                    
-                    document.getElementById('model2Response').innerHTML = `
-                        <div class="alert alert-success" role="alert">
-                            <h5>Skills Found:</h5>
-                            ${skillsList}
-                        </div>
-                    `;
-                }
+                allJobs = data;
+                displayJobs(currentJobPage);
+                setupJobPagination();
             })
             .catch(error => {
-                // Handle fetch errors
-                document.getElementById('model2Response').innerHTML = `
+                document.getElementById('jobPostingsContainer').innerHTML = `
                     <div class="alert alert-danger" role="alert">
-                        Error: ${error.message}
+                        Error loading job postings: ${error.message}
                     </div>
                 `;
             });
-        });
+        }
 
-        // Handle Model 3 Search and Apply
-        document.getElementById('model3Form').addEventListener('submit', function(event) {
+        // Display jobs for the current page
+        function displayJobs(page) {
+            const startIndex = (page - 1) * jobsPerPage;
+            const endIndex = startIndex + jobsPerPage;
+            const jobsToDisplay = allJobs.slice(startIndex, endIndex);
+
+            let jobsHTML = '';
+
+            if (jobsToDisplay.length === 0) {
+                jobsHTML = '<div class="alert alert-info">No jobs found.</div>';
+            } else {
+                jobsToDisplay.forEach(job => {
+                    // Try to parse skills JSON
+                    let skills = [];
+                    try {
+                        if (job.extracted_skills_json) {
+                            skills = JSON.parse(job.extracted_skills_json)
+                        }
+                    } catch (e) {
+                        console.error("Error parsing skills JSON:", e);
+                    }
+
+                    // Create skills display
+                    let skillsHTML = '';
+                    for (const [category, skillList] of Object.entries(skills)) {
+                        if (Array.isArray(skillList) && skillList.length > 0) {
+                            skillsHTML += `<strong>${category}:</strong><div class="skills-container">`;
+                            skillList.forEach(skill => {
+                                skillsHTML += `<span class="skill">${skill}</span>`;
+                            });
+                            skillsHTML += `</div><br>`;
+                        }
+                    }
+
+                    jobsHTML += `
+                        <div class="card job-card">
+                            <div class="card-header">
+                                <strong>Job ID:</strong> ${job.job_id}
+                            </div>
+                            <div class="card-body">
+                                <div class="mt-2">
+                                    ${skillsHTML || 'No skills specified'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('jobPostingsContainer').innerHTML = jobsHTML;
+        }
+
+        // Setup pagination for jobs
+        function setupJobPagination() {
+            const totalPages = Math.ceil(allJobs.length / jobsPerPage);
+            let paginationHTML = '';
+            
+            if (totalPages > 1) {
+                paginationHTML = `
+                    <nav aria-label="Job postings pagination">
+                        <ul class="pagination">
+                            <li class="page-item ${currentJobPage === 1 ? 'disabled' : ''}">
+                                <a class="page-link" href="#" onclick="changePage(${currentJobPage - 1}, 'job'); return false;">&laquo;</a>
+                            </li>
+                `;
+                
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHTML += `
+                        <li class="page-item ${currentJobPage === i ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="changePage(${i}, 'job'); return false;">${i}</a>
+                        </li>
+                    `;
+                }
+                
+                paginationHTML += `
+                            <li class="page-item ${currentJobPage === totalPages ? 'disabled' : ''}">
+                                <a class="page-link" href="#" onclick="changePage(${currentJobPage + 1}, 'job'); return false;">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                `;
+            }
+            
+            document.getElementById('jobPagination').innerHTML = paginationHTML;
+        }
+
+        // Change page function for both job listings and match results
+        function changePage(page, type) {
+            if (type === 'job') {
+                if (page < 1 || page > Math.ceil(allJobs.length / jobsPerPage)) return;
+                currentJobPage = page;
+                displayJobs(currentJobPage);
+                setupJobPagination();
+            } else if (type === 'match') {
+                if (page < 1 || page > Math.ceil(matchedJobs.length / jobsPerPage)) return;
+                currentMatchPage = page;
+                displayMatchedJobs(currentMatchPage);
+                setupMatchPagination();
+            }
+        }
+
+        // Match jobs handler
+        document.getElementById('matchJobsForm').addEventListener('submit', function(event) {
             event.preventDefault();
-
-            const name = document.getElementById('model3Name').value;
-
-            // Send GET request to Flask endpoint with the 'name' parameter
-            fetch(`http://localhost:5001/model3?name=${encodeURIComponent(name)}`, {
+            
+            const name = document.getElementById('matchJobsName').value;
+            document.getElementById('matchJobsResponse').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Finding matching jobs...</p>
+                </div>
+            `;
+            
+            fetch(`http://localhost:5001/match?name=${encodeURIComponent(name)}`, {
                 method: 'GET',
             })
             .then(response => response.json())
             .then(data => {
-                // Handle success response from Flask
                 if (data.error) {
-                    // Show error if no resume is found or other errors
-                    document.getElementById('model3Response').innerHTML = `
+                    document.getElementById('matchJobsResponse').innerHTML = `
                         <div class="alert alert-danger" role="alert">
                             ${data.error}
                         </div>
                     `;
+                    document.getElementById('matchPagination').innerHTML = '';
                 } else {
-                    // Show the extracted skills if no error
-                    let skillsList = '<ul>';
-                    for (const [skill, details] of Object.entries(data)) {
-                        skillsList += `<li><strong>${skill}:</strong> ${details.join(', ')}</li>`;
-                    }
-                    skillsList += '</ul>';
-                    
-                    document.getElementById('model3Response').innerHTML = `
-                        <div class="alert alert-success" role="alert">
-                            <h5>Skills Found:</h5>
-                            ${skillsList}
-                        </div>
-                    `;
+                    // Process and display matched jobs
+                    processMatchResults(data);
                 }
             })
             .catch(error => {
-                // Handle fetch errors
-                document.getElementById('model3Response').innerHTML = `
+                document.getElementById('matchJobsResponse').innerHTML = `
                     <div class="alert alert-danger" role="alert">
-                        Error: ${error.message}
+                        Error matching jobs: ${error.message}
                     </div>
                 `;
+                document.getElementById('matchPagination').innerHTML = '';
             });
-        
         });
 
+        // Process match results
+        function processMatchResults(results) {
+            // Display the first page
+            matchedJobs = results
+            currentMatchPage = 1;
+            displayMatchedJobs(currentMatchPage);
+            setupMatchPagination();
+        }
+
+        // Display matched jobs
+        function displayMatchedJobs(page) {
+            const startIndex = (page - 1) * jobsPerPage;
+            const endIndex = startIndex + jobsPerPage;
+            const jobsToDisplay = matchedJobs.slice(startIndex, endIndex);
+            
+            let matchHTML = '';
+            
+            if (jobsToDisplay.length === 0) {
+                matchHTML = '<div class="alert alert-info">No matching jobs found.</div>';
+            } else {
+                matchHTML = '<h5>Match Results (Sorted by Similarity):</h5>';
+                
+                jobsToDisplay.forEach(match => {
+                    const jobId = match[0];
+                    const score = parseFloat(match[1]);
+                    
+                    // Find the job details
+                    const jobDetails = allJobs.find(job => job.job_id == jobId);
+                    // Determine score class
+                    let scoreClass = 'score-low';
+                    if (score >= 0.7) {
+                        scoreClass = 'score-high';
+                    } else if (score >= 0.4) {
+                        scoreClass = 'score-medium';
+                    }
+                    
+                    // Format the job info
+                    if (jobDetails) {
+                        let skills = [];
+                        try {
+                            if (jobDetails.extracted_skills_json) {
+                                skills = JSON.parse(jobDetails.extracted_skills_json)
+                                console.log(skills)
+                            }
+                        } catch (e) {
+                            console.error("Error parsing skills JSON:", e);
+                        }
+                        
+                        // Create skills display
+                        let skillsHTML = '';
+                        for (const [category, skillList] of Object.entries(skills)) {
+                            if (Array.isArray(skillList) && skillList.length > 0) {
+                                skillsHTML += `<strong>${category}:</strong><div class="skills-container">`;
+                                skillList.forEach(skill => {
+                                    skillsHTML += `<span class="skill">${skill}</span>`;
+                                });
+                                skillsHTML += `</div><br>`;
+                            }
+                        }
+
+                        matchHTML += `
+                            <div class="card job-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <strong>Job ID:</strong> ${jobId}
+                                    <span class="badge ${scoreClass}">Match Score: ${(score * 100).toFixed(1)}%</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mt-2">
+                                        ${skillsHTML || 'No skills specified'}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+ 
+                    } else {
+                        matchHTML += `
+                            <div class="card job-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <strong>Job ID:</strong> ${jobId}
+                                    <span class="badge ${scoreClass}">Match Score: ${(score * 100).toFixed(1)}%</span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Job details not available</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            document.getElementById('matchJobsResponse').innerHTML = matchHTML;
+        }
+
+        // Setup pagination for match results
+        function setupMatchPagination() {
+            const totalPages = Math.ceil(matchedJobs.length / jobsPerPage);
+            let paginationHTML = '';
+            
+            if (totalPages > 1) {
+                paginationHTML = `
+                    <nav aria-label="Match results pagination">
+                        <ul class="pagination">
+                            <li class="page-item ${currentMatchPage === 1 ? 'disabled' : ''}">
+                                <a class="page-link" href="#" onclick="changePage(${currentMatchPage - 1}, 'match'); return false;">&laquo;</a>
+                            </li>
+                `;
+                
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHTML += `
+                        <li class="page-item ${currentMatchPage === i ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="changePage(${i}, 'match'); return false;">${i}</a>
+                        </li>
+                    `;
+                }
+                
+                paginationHTML += `
+                            <li class="page-item ${currentMatchPage === totalPages ? 'disabled' : ''}">
+                                <a class="page-link" href="#" onclick="changePage(${currentMatchPage + 1}, 'match'); return false;">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                `;
+            }
+            
+            document.getElementById('matchPagination').innerHTML = paginationHTML;
+        }
     </script>
-    
 </body>
 </html>
