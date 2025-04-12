@@ -104,9 +104,11 @@ def match():
         pulledJobs = JobPosting.query.all()
         jobs = [(job.job_id, json.loads(json.loads(job.extracted_skills_json))) for job in pulledJobs]
         userSkills = json.loads(Resume.query.filter_by(name=name).first().extracted_skills_json)
-        userCombinedSkills = combineSkillsToString(userSkills)
+        userCombinedSkills = ("user", combineSkillsToString(userSkills))
         jobsCombined = [(jobID, combineSkillsToString(skills)) for jobID, skills in jobs]
-        matchingScores = find_similar_texts(userCombinedSkills, jobsCombined, matching_model)
+        df = pd.DataFrame(columns=["jobId/user", "skillString"],data=([userCombinedSkills] + jobsCombined))
+        df.to_csv("./datasets/combined_skills.csv")
+        matchingScores = find_similar_texts(userCombinedSkills[1], jobsCombined, matching_model)
         return jsonify(matchingScores), 200
     except Exception as e:
         app.logger.error(f"Error matching: {str(e)}")
@@ -124,14 +126,11 @@ def extract_skills():
             return jsonify({"error": "Resume not found"}), 404
         
         resume = pulledResume.text
-        resume_ngrams = extract_ngrams_from_text(resume)  # Generate n-grams
-        resume_skills = match_skills(resume_ngrams, resume)  # Match skills
+        resume_skills = match_skills_spacy(resume)  # Generate n-grams
         education_skills = resume_skills["Education Certification (EC)"]
         predictions = predict_entities(resume)
         outside_words = predictions["Outside (O)"]  # Extract "Outside" words/phrases from Model 2
-        outside_text = preprocess_text(" ".join(outside_words))
-        outside_ngrams = extract_ngrams_from_text(outside_text)  # Generate n-grams
-        skills_from_outside = match_skills(outside_ngrams, outside_text)  # Match skills
+        skills_from_outside = match_skills_spacy(" ".join(outside_words))
 
         for category, skills in predictions.items():
             if category != "Outside (O)" and category != "Education Certification (EC)":

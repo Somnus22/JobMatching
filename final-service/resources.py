@@ -1,8 +1,8 @@
 import re
+import spacy
+import sys
+import subprocess
 import nltk
-from nltk.util import ngrams
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
 from collections import defaultdict
 import joblib
 import gensim
@@ -13,28 +13,29 @@ import string
 from sklearn.metrics.pairwise import cosine_similarity
 from gensim.models import Word2Vec
 
-nltk.download('punkt_tab')
 nltk.download("stopwords")
 
+nlp = spacy.load('en_core_web_sm')
+#Skill dictionaries
 skill_dictionaries = {
-    "Programming Languages (PL)" : [
+    "Programming Language (PL)" : [
         "python","java",'javascript','java script',"c++","c","c#","ruby",'go','php','swift','typescript','type script','kotlin',
         'rust','scala','perl','r','matlab','assembly','visual basic','visual basic for applications','vba'
     ],
 
-    "Frameworks (FW)": [
+    "Framework (FW)": [
         "django", "flask", "spring", "spring framework", "spring boot", "react", "reactnative", "angular", "vue", "express", "fastapi", "asp.net", 
         ".net", "laravel", "ruby on rails", "symfony", "meteor", "gatsby", "svelte", "phoenix", "cake"
     ],
 
-    "Databases (DB)": [
+    "Database (DB)": [
         "datastore", "firestore", "metastore", "blob storage", "object storage", "file storage", "data storage", "disk storage", "cloud storage",
         "database", "knowledgebase", "firebase", "hbase", "database management", "database system", "database administration"
         "data warehouse", "data lake", "data mart", "data repository", "data center", "data server", "data modeling",
         "redis", "cassandra"
     ],
 
-    "Cloud Platforms (CP)":[
+    "Cloud Platform (CP)":[
         "cloud", "cloud computing", "cloud storage", "cloud infrastructure", "cloud platform",
         "azure", "azure kubernetes service", "microsoft azure", 
         "gcp", "google cloud", "google cloud platform", "google cloud functions",
@@ -163,22 +164,46 @@ def preprocess_text(text):
     text = text.replace('.', '')
     return text
 
-def extract_ngrams_from_text(text, max_n=4):
-    processed_text = preprocess_text(text)
-    tokens = nltk.word_tokenize(processed_text)
+def preprocess_text_spacy(text):
+    """Preprocess text using spaCy's capabilities"""
+    text = text.lower()
+    text = re.sub(r'[0-9]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    # Process the text with spaCy
+    doc = nlp(text)
+    
+    return doc
+
+def extract_ngrams_spacy(doc, max_n=4):
+    """Extract n-grams using spaCy's token attributes"""
+    tokens = [token.text for token in doc if not token.is_punct and not token.is_space]
     
     all_ngrams = []
-    for n in range(1, max_n+1):
-        n_gram_list = list(ngrams(tokens, n))
-        all_ngrams.extend([' '.join(gram) for gram in n_gram_list])
+    for n in range(1, min(max_n + 1, len(tokens) + 1)):
+        for i in range(len(tokens) - n + 1):
+            all_ngrams.append(' '.join(tokens[i:i+n]))
     
     return all_ngrams
 
-def sliding_window_match(tokens, skill_dictionaries, window_size=6):
+def extract_noun_phrases(doc):
+    """Extract noun phrases which are likely to be skills"""
+    return [chunk.text.lower() for chunk in doc.noun_chunks]
+
+def extract_entities(doc):
+    """Extract named entities which might represent technical skills"""
+    return [ent.text.lower() for ent in doc.ents]
+
+def sliding_window_match_spacy(doc, skill_dictionaries, window_size=6):
     """
-    Extract skills where the words appear within a sliding window but not necessarily consecutively.
+    Extract skills where the words appear within a sliding window
+    Using spaCy's token attributes for better matching
     """
     extracted_skills = defaultdict(set)
+    
+    # Convert tokens to text for window matching
+    tokens = [token.text.lower() for token in doc 
+              if not token.is_punct and not token.is_space]
     
     for category, skills in skill_dictionaries.items():
         for skill in skills:
@@ -189,11 +214,9 @@ def sliding_window_match(tokens, skill_dictionaries, window_size=6):
             for i in range(len(tokens) - window_size + 1):
                 window = tokens[i:i+window_size]
                 
-                window_lower = [w.lower() for w in window]
-                
-                if all(word in window_lower for word in skill_words):
+                if all(word in window for word in skill_words):
                     try:
-                        positions = [window_lower.index(word) for word in skill_words]
+                        positions = [window.index(word) for word in skill_words]
                         scatter_factor = max(positions) - min(positions) + 1
                         
                         if scatter_factor <= len(skill_words) + 2:
@@ -203,49 +226,91 @@ def sliding_window_match(tokens, skill_dictionaries, window_size=6):
                         continue
     
     return extracted_skills
-  
-    
-def match_skills(ngram_list, text):
-    extracted_skills = defaultdict(set)
-    
-    processed_text = preprocess_text(text)
-    tokens = nltk.word_tokenize(processed_text)
-    
-    js_frameworks = re.findall(r'\b\w+\.js\b', text.lower())
 
-    sql_db = re.findall(r"\b((?:\w+)ql(?:\w+)?|(?:\w+)db)\b", text.lower())
-
+def create_spacy_patterns(skill_dictionaries):
+    """Create patterns for spaCy's Matcher"""
+    patterns = []
     for category, skills in skill_dictionaries.items():
         for skill in skills:
-            if ' ' not in skill:
-                if skill in ngram_list:
-                    clean_skill = skill.replace('.', '')
-                    extracted_skills[category].add(clean_skill)
+            # Create pattern for exact match
+            pattern = [{"LOWER": word} for word in skill.split()]
+            patterns.append((skill, pattern))
+    
+    return patterns
+
+def match_skills_spacy(text):
+    """
+    Match skills in text using spaCy's capabilities
+    """
+    extracted_skills = defaultdict(set)
+    
+    # Process text with spaCy
+    doc = preprocess_text_spacy(text)
+    
+    # Extract n-grams
+    ngrams = extract_ngrams_spacy(doc)
+    
+    # Extract noun phrases (potential skills)
+    noun_phrases = extract_noun_phrases(doc)
+    
+    # Extract named entities
+    entities = extract_entities(doc)
+    
+    # Combine all potential skill texts to check against dictionaries
+    all_candidates = set(ngrams + noun_phrases + entities)
+    
+    # Custom regex patterns for specific technical terms
+    js_frameworks = re.findall(r'\b\w+\.js\b', text.lower())
+    sql_db = re.findall(r"\b((?:\w+)ql(?:\w+)?|(?:\w+)db)\b", text.lower())
+    
+    # Match against dictionaries
+    for category, skills in skill_dictionaries.items():
+        for skill in skills:
+            # Direct match for single-word skills
+            if ' ' not in skill and skill in all_candidates:
+                clean_skill = skill.replace('.', '')
+                extracted_skills[category].add(clean_skill)
             else:
-                skill_words = skill.split()
-                for ngram in ngram_list:
-                    if skill == ngram:
+                # For multi-word skills
+                skill_lower = skill.lower()
+                for candidate in all_candidates:
+                    if skill_lower == candidate.lower():
                         clean_skill = skill.replace('.', '')
                         extracted_skills[category].add(clean_skill)
                         break
-                    elif len(ngram.split()) > len(skill_words) and skill in ngram:
-                        ngram_words = ngram.split()
-                        for i in range(len(ngram_words) - len(skill_words) + 1):
-                            if ' '.join(ngram_words[i:i+len(skill_words)]) == skill:
+                    # Check if skill is contained within a longer phrase
+                    elif len(candidate.split()) > len(skill.split()) and skill_lower in candidate.lower():
+                        candidate_words = candidate.lower().split()
+                        skill_words = skill_lower.split()
+                        for i in range(len(candidate_words) - len(skill_words) + 1):
+                            if ' '.join(candidate_words[i:i+len(skill_words)]) == skill_lower:
                                 clean_skill = skill.replace('.', '')
                                 extracted_skills[category].add(clean_skill)
                                 break
     
-    sliding_matches = sliding_window_match(tokens, skill_dictionaries)
+    # Add sliding window matches
+    sliding_matches = sliding_window_match_spacy(doc, skill_dictionaries)
     for category, skills in sliding_matches.items():
         extracted_skills[category].update(skills)
     
+    # Add specialized matches from regex
     for skill in js_frameworks:
         clean_skill = skill.replace('.', '')
-        extracted_skills["Frameworks (FW)"].add(clean_skill)
+        extracted_skills["Framework (FW)"].add(clean_skill)
     
     for skill in sql_db:
-        extracted_skills["Databases (DB)"].add(clean_skill)
+        clean_skill = skill.replace('.', '')
+        extracted_skills["Database (DB)"].add(clean_skill)
+    
+    # Add lemma-based matching for variations of the same word
+    for token in doc:
+        lemma = token.lemma_.lower()
+        # Check if the lemma is in any skill list
+        for category, skills in skill_dictionaries.items():
+            for skill in skills:
+                if ' ' not in skill and lemma == skill:
+                    clean_skill = skill.replace('.', '')
+                    extracted_skills[category].add(clean_skill)
     
     return extracted_skills
 
