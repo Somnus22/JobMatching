@@ -1,7 +1,6 @@
 # JobMatching
-
-### Folders
-# Final-service
+## Folders 
+### Final-service
 - Storing the stuff necessary for the final app. 
 - Datasets:
   - short.csv is the subset of job postings we are using for testing the app.
@@ -13,28 +12,28 @@
 - requirements.txt: Library pre-requisites for app
 - resources.py: Function definitions + imports for app
 
-# Bert
+### Bert
 - What we used to test our BERT models, containing various JSON/txt files for testing purposes, and notebooks for task 1's BERT, task 2's BERT, testing the performance of task 1's BERT, and finetuning the task 1 BERT.
 
-# Match_test
+### Match_test
 - The combined match scores of the different LLMs and ours, plus a test.ipynb to output the match scores for comparison with the LLMs
 
-# Rule_based_NER
+### Rule_based_NER
 - Our rule based solution for Task 1, including our main model tested on resume, then using the same model for job postings
 
-# TF_IDF_matching
+### TF_IDF_matching
 - Just our TF-IDF model for Task 2
 
-# Word_embedding_matching
+### Word_embedding_matching
 - Our word2vec model for Task2
 
-# Docker_compose.yml
+### Docker_compose.yml
 - Our docker file for running the app easily
 
-# Front_end.html
+### Front_end.html
 - Our app's website.
   
-### Running the App
+## Running the App
 1) Start docker and MAMP
 2) In the main folder, type docker-compose -f docker_compose.yml up --build
 3) Run the html 
