@@ -1,73 +1,46 @@
-# FloppyDisk
+# JobFit
 
-### What is our project about
+### Folders
+# Final-service
+- Storing the stuff necessary for the final app. 
+- Datasets:
+  - short.csv is the subset of job postings we are using for testing the app.
+  - extracted_job_skills.csv is the result of extracting job skills (done previously) from the short.csv, and used to store the job postings in the app's database.
+- app.py: The actual Docker app
+- crf_model.joblib: Our saved CRF model for NER
+- Dockerfile: Container instructions for app
+- matching.model: Our saved model for word embedding matching
+- requirements.txt: Library pre-requisites for app
+- resources.py: Function definitions + imports for app
 
-Hiring managers have a hard time efficiently and effectively screening large volumes of resumes against job requirements. With potentially hundreds of resumes received for each position, manually reviewing and matching prospective candidates to job requirements is time-consuming and potentially inconsistent. The unstructured nature of both resumes and job postings makes it difficult to quickly identify good candidates, leading to increased time-to-hire and potential missed opportunities.
+# Bert
+- What we used to test our BERT models, containing various JSON/txt files for testing purposes, and notebooks for task 1's BERT, task 2's BERT, testing the performance of task 1's BERT, and finetuning the task 1 BERT.
 
-Hence, this project aims to develop a text analysis solution that automatically generates accurate job matching scores between resumes and job postings, helping hiring managers quickly identify the most promising candidates.
+# Match_test
+- The combined match scores of the different LLMs and ours, plus a test.ipynb to output the match scores for comparison with the LLMs
 
-### Exploratory Data Analysis (EDA)
+# Rule_based_NER
+- Our rule based solution for Task 1, including our main model tested on resume, then using the same model for job postings
 
-| Dataset | Description |
-| ------- | ----------- |
-| [Resume Corpus](https://github.com/florex/resume_corpus) | Contains a collection of resumes |
-| [LinkedIn Job Postings](https://www.kaggle.com/datasets/arshkon/linkedin-job-postings) | Contains a collection of job postings |
+# TF_IDF_matching
+- Just our TF-IDF model for Task 2
 
-We carried out simple data and text preprocessing prior to obtaining the statistical data required for the EDA. 
+# Word_embedding_matching
+- Our word2vec model for Task2
 
-Data Preprocessing (Cleaning and Standardization)
-- Removed HTML tags, encoding artifacts, special characters, company disclaimers.
+# Docker_compose.yml
+- Our docker file for running the app easily
 
-Text Preprocessing (For NLP Tasks)
-- Named Entity Recognition (NER) Analysis: Extracted skills, job titles, companies.
-- Word Cloud Visualization: Most frequent words and extracted skills.
-- POS Tagging Distribution: Analysis of nouns, verbs, adjectives in text.
-
-## Text Mining Tasks
-
-### Task 1: Named Entity Recognition (NER)
-**Model 1: Rule-Based NER with spaCy, NLTK, Regex**
-- **Techniques:** Patterns, dictionaries, regex
-- **Steps:** Create dictionaries → Define patterns → Apply rules → Extract entities
-
-**Model 2: Statistical NER with sklearn-crfsuite**
-- **Techniques:** Feature engineering, sequence labeling
-- **Steps:** Label data → Extract features → Train CRF → Apply model
-
-**Model 3: Deep Learning NER (BERT) with Hugging Face transformers, Pytorch**
-- **Techniques:** Neural networks, transfer learning
-- **Steps:** Load BERT → Fine-tune → Create pipeline → Extract entities
-
-**Evaluation Metrics**
-- **Precision:** Measures how many extracted entities are correct. E.g., Identifying "Python" as a programming skill and "AWS" as a cloud technology.
-- **Recall:** Measures how many relevant skills were extracted. E.g., Finding all required and preferred skills mentioned in a job posting like "Python", "AWS", "Docker".
-- **F1-score:** Combines precision and recall. E.g., Model correctly identifies skills and their requirement levels (required, preferred, good to have).
-- **Entity classification quality (Qualitative):** Correct identification of skills.
-
-
-### Task 2: Document Similarity
-**Model 1: TF-IDF Similarity with sklearn**
-- **Techniques:** Term frequency, cosine similarity
-- **Steps:** Convert to vectors → Calculate similarity → Generate scores
-
-**Model 2: Word Embeddings with gensim, Word2Vec**
-- **Techniques:** Word embeddings, semantic vectors
-- **Steps:** Generate embeddings → Create vectors → Calculate similarity → Generate scores
-
-**Model 3: BERT Embeddings with sentence-transformers**
-- **Techniques:** Contextual embeddings, neural similarity
-- **Steps:** Generate embeddings → Calculate similarity → Weight features → Generate scores
-
-**Evaluation Metrics**
-- **Precision:** Measures how many matched resumes are truly similar
-- **Recall:** Measures how many relevant resumes are retrieved compared to all possible relevant resumes
-- **F1-score:** Harmonic mean of precision and recall, balancing false positives and false negatives
-- **Mean Reciprocal Rank (MRR):** Evaluates ranked retrieval performance, checking how high relevant resumes are ranked
-
+# Front_end.html
+- Our app's website.
+  
 ### Running the App
-1) in the main folder, type docker-compose -f docker_compose.yml up --build
-2) run the html via MAMP
-3) Upload Resume
-4) Extract Skills
-5) Load Job Postings
-6) Match to Jobs
+1) Start docker and MAMP
+2) In the main folder, type docker-compose -f docker_compose.yml up --build
+3) Run the html 
+4) Upload Resume
+5) Extract Skills
+6) Load Job Postings
+7) Match to Jobs
+
+- If any issues faced with the app in terms of database, close the app, delete docker container and start from step 2. There are unique constraints in place to not overwrite files saved under each name.
